@@ -2,6 +2,10 @@ import React, { Component } from 'react';
 import Calendar from 'react-calendar';
 import TimePicker from 'react-times';
 import 'react-times/css/material/default.css';
+import { getLocation } from '../actions/Geolocator';
+import { GoogleMap, Marker, withGoogleMap,withScriptjs } from 'react-google-maps';
+import InputRange from 'react-input-range';
+import 'react-input-range/lib/css/index.css';
 
 export class BasicSelection extends Component {
   constructor(props) {
@@ -16,8 +20,14 @@ export class BasicSelection extends Component {
 
   onClick(value) {
     this.setState({
-      selectedValue : value
+      selectedValue : value.name
     });
+
+    this.onSelectionChange(value); 
+  }
+
+  onSelectionChange(item) {
+    this.props.onSelectionChange(item);
   }
 
   render() { 
@@ -27,7 +37,7 @@ export class BasicSelection extends Component {
       if(item.name == this.state.selectedValue) {
         selector += " active";
       }
-      return (<button className={selector} key={item.name} onClick={() => this.onClick(item.name)}>
+      return (<button className={selector} key={item.name} onClick={() => this.onClick(item)}>
         {item.name}
       </button>);
     });
@@ -55,12 +65,33 @@ export class PlaceSelection extends Component {
     }
 
     this.onClick = this.onClick.bind(this);
+    this.findMe = this.findMe.bind(this);
   }
 
-  onClick(value) {
-    this.setState({
-      selectedValue : value
+  findMe() {
+    console.log("Found");
+
+    getLocation().then((location) => {
+      this.setState({
+        latitude : location.latitude,
+        longitude : location.longitude,
+        locationError : false
+      })
+    }).catch((error) => {
+      this.setState({
+        locationError : true
+      });
     });
+  }
+
+  onClick(item) {
+    this.setState({
+      selectedValue : item.id,
+      latitude : item.latitude,
+      longitude : item.longitude
+    });
+
+    this.props.onSelectionChange(item);
   }
 
   render() {
@@ -70,10 +101,24 @@ export class PlaceSelection extends Component {
       if(item.id == this.state.selectedValue) {
         selector += " active";
       }
-      return (<button className={selector} key={item.id} onClick={() => this.onClick(item.id)}>
+      return (<button className={selector} key={item.id} onClick={() => this.onClick(item)}>
         {item.name}
       </button>);
     });
+
+    let map = <span>Map placeholder</span>;
+
+    if(this.state.latitude && this.state.longitude) {
+      map = <MyMapComponent
+        googleMapURL="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places"
+        loadingElement={<div style={{ height: `100%` }} />}
+        containerElement={<div style={{ height: `400px` }} />}
+        mapElement={<div style={{ height: `100%` }} />}
+        position={{ lat: this.state.latitude, lng: this.state.longitude }}
+        defaultZoom={8}
+      />
+    }
+
 
     return(
       <div className="row">
@@ -84,10 +129,22 @@ export class PlaceSelection extends Component {
             {items}
           </div>
         </div>
+        <span>Latitude: {this.state.latitude}</span>
+        <span>Longitude: {this.state.longitude}</span>
+        {map}
+        <div className="row">
+          <div className="col-xs-12">
+            <button className="btn btn-primary" onClick={() => this.findMe()}>Find me!</button>
+          </div>
+        </div>
       </div>
     );
   }
 }
+
+const MyMapComponent = withScriptjs(withGoogleMap(props => {
+  return <GoogleMap defaultZoom={props.defaultZoom} defaultCenter={props.position}><Marker position={props.position}/></GoogleMap>
+}))
 
 export class WeightSelection extends Component {
   constructor(props) {
@@ -102,13 +159,28 @@ export class WeightSelection extends Component {
     this.changeGrams = this.changeGrams.bind(this);
   }
 
-  changeKilograms(event){
-         this.setState({kg: event.target.value});
+  changeKilograms(value){
+    this.setState({kg: value});
+
+    this.props.handleChange(this.getTotal());
   }
 
-  changeGrams(event){
-         this.setState({g: event.target.value});
+  changeGrams(value){
+    this.setState({g: value});
+    this.props.handleChange(this.getTotal());
   }
+
+  componentDidUpdate(prevProps) {
+    // Typical usage (don't forget to compare props):
+    if ((prevProps.fish == null || this.props.fish.name != prevProps.fish.name) && this.props.fish != null) {
+        this.setState({
+          kg : parseInt((this.props.fish.additionalAttributes.weight.default) / 1000),
+          g : this.props.fish.additionalAttributes.weight.default - (parseInt((this.props.fish.additionalAttributes.weight.default) / 1000) * 1000)
+        })
+    }
+  }
+
+
 
   getTotal() {
     return (this.state.kg * 1000) + parseInt(this.state.g);
@@ -118,10 +190,10 @@ export class WeightSelection extends Component {
     return(
     	<div className="row">
         <strong>kg</strong>
-        <input type="range" step="1" min="0" max="10" value={this.state.kg} onChange={this.changeKilograms}/>
+        <InputRange step={1} minValue={0} maxValue={10} value={this.state.kg} onChange={this.changeKilograms} />
 
         <strong>g</strong>
-        <input type="range" step="50" min="0" max="999" value={this.state.g} onChange={this.changeGrams} />
+        <InputRange step={50} minValue={0} maxValue={999} value={this.state.g} onChange={this.changeGrams} />
 
         <strong>Total weight: {this.getTotal()}</strong>
       </div>
@@ -153,7 +225,9 @@ export class DateSelection extends Component {
 
     this.setState({
       date : date
-    })
+    });
+
+    this.props.handleTimeChange(date);
   }
 
   onTimeChange(time) {
@@ -166,6 +240,8 @@ export class DateSelection extends Component {
       minute : time.minute,
       date : date
     })
+
+    this.props.handleTimeChange(date);
   }
 
   getTime() {
