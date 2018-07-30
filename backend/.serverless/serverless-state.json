@@ -160,7 +160,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/draught-service/dev/1532622383525-2018-07-26T16:26:23.525Z/draught-service.zip"
+                "S3Key": "serverless/draught-service/dev/1532868894473-2018-07-29T12:54:54.473Z/draught-service.zip"
               },
               "FunctionName": "draught-service-dev-app",
               "Handler": "src/server.handler",
@@ -191,14 +191,14 @@
               "IamRoleLambdaExecution"
             ]
           },
-          "AppLambdaVersion88xGZURQ3gtrlAyBgDcne1fmwu1VYvWLmsLqSqavMrk": {
+          "AppLambdaVersionl3WoPjufBM5EDnB1zN4HdoEW6CuD8AhoJopLtbhvo": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "AppLambdaFunction"
               },
-              "CodeSha256": "jzM+PR2v+Go9HbD3Lk2fukQjx6GoecsbKsh+UKtTn0g="
+              "CodeSha256": "/+mMC+j86H0uCdAnRAFa3ikzzhawsMeMhfId8cC6JK0="
             }
           },
           "ApiGatewayRestApi": {
@@ -316,7 +316,7 @@
               "MethodResponses": []
             }
           },
-          "ApiGatewayDeployment1532622383578": {
+          "ApiGatewayDeployment1532868894567": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -386,7 +386,7 @@
           "AppLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "AppLambdaVersion88xGZURQ3gtrlAyBgDcne1fmwu1VYvWLmsLqSqavMrk"
+              "Ref": "AppLambdaVersionl3WoPjufBM5EDnB1zN4HdoEW6CuD8AhoJopLtbhvo"
             }
           },
           "ServiceEndpoint": {
@@ -452,10 +452,10 @@
         "vpc": {}
       }
     },
-    "artifact": "C:\\fishing-application\\backend\\.serverless\\draught-service.zip"
+    "artifact": "D:\\galastus\\fishing-application\\backend\\.serverless\\draught-service.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/draught-service/dev/1532622383525-2018-07-26T16:26:23.525Z",
+    "artifactDirectoryName": "serverless/draught-service/dev/1532868894473-2018-07-29T12:54:54.473Z",
     "artifact": "draught-service.zip"
   }
 }

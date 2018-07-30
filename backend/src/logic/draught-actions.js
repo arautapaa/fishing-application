@@ -43,13 +43,16 @@ const actions = {
 							additionalAttributes : item.AdditionalAttributes
 						}
 
+						console.log(JSON.stringify(draught));
+
 						draughts.push(draught);
 
 						callback(null);
-					}, function(err, draughts) {
+					}, function(err) {
 						if(err) {
 							reject(err);
 						} else {
+							console.log(JSON.stringify(draughts));
 							resolve(draughts);
 						}
 					});

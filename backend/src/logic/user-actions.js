@@ -40,7 +40,6 @@ const actions = {
 			});
 		});
 	},
-
 	/**
 	 * Adds user group to user
 	 * @param {String} userId  AWS Cognito user id

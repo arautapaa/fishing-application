@@ -53,4 +53,16 @@ router.post('/groups/:id', (req, res) => {
 	});
 });
 
+router.put('/groups/:id', (req, res) => {
+	const userId = req.context.identity.cognitoIdentityId;
+	const groupId = req.params.id;
+
+	actions.addUserGroupToUser(userId, groupId).then((response) => {
+		res.status(201).send(response);
+	}).catch((error) => {
+		res.status(400).send(error);
+	})
+});
+
+
 module.exports = router;

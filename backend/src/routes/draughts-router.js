@@ -6,8 +6,9 @@ const actions = require('../logic/draught-actions.js');
 router.get('/', function(req, res) {
 	const userId = req.selectedUserGroup;
 
-	actions.getDraughtsForUser(userId).then((draughts) => {
-		res.status(200).send(draughts);
+	actions.getDraughtsForUser(userId).then((response) => {
+		console.log(JSON.stringify(response));
+		res.send(response);
 	}).catch((error) => {
 		res.status(400).send(error);
 	});
@@ -29,7 +30,7 @@ router.get('/:id', function(req, res) {
 	const draughtId = req.params.id;
 
 	actions.getOneDraught(userId, draughtId).then((draught) => {
-		res.status(200).send(draught);
+		res.send(draught);
 	}).catch((error) => {
 		if(error.key == 'NO_ENTRY_FOUND') {
 			res.status(404).send(error);

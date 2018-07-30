@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import { BasicSelection, PlaceSelection, WeightSelection, DateSelection } from './Selections';
 import { AdditionalAttributes } from './AdditionalAttributes';
+import { saveDraught } from '../actions/DraughtServices';
 
 class AddEntry extends Component {
 	constructor(props) {
 		super(props);
+
+		console.log(props);
 
 		this.state = {
 		  	selected : {
@@ -66,23 +69,28 @@ class AddEntry extends Component {
 		this.handleChange('additionalAttributes', attributes);
 	}
 
+
+
 	save() {
 		console.log(this.state.selected);
 		const draught = this.state.selected;
 
-		console.log({
+		saveDraught({
 			fish : draught.fish.name,
 			gear : draught.gear.name,
 			fisher : draught.fisher.name,
 			placeId : draught.place.id,
 			weight : draught.weight,
-			catchTime : draught.catchTime.getISOString(),
+			catchTime : draught.catchTime.toISOString(),
 			additionalAttributes : draught.additionalAttributes
+		}).then((response) => {
+			console.log("JIPPII");
 		})
 	}
   render() {
     return(
-    	<div className="container">
+    	<div className="container">  
+
     		<BasicSelection title="Fish" items={this.props.selections.fish} 
     			onSelectionChange={this.handleFishChange}
     		/>
