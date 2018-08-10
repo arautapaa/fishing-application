@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { isLoggedIn, authenticate, getUser } from '../actions/Authentication';
 import GoogleLogin from 'react-google-login';
-import { Redirect } from 'react-router-dom'
+import { Redirect } from 'react-router-dom';
+import * as EnvironmentConfiguration from '../../environment';
 
 export default class LoginPage extends Component {
 	constructor(props) {
@@ -18,9 +19,9 @@ export default class LoginPage extends Component {
 	responseGoogle(response) {
 		const self = this;
 
-		if(self.props.responseGoogle != null) {
-			authenticate(response.getAuthResponse()['id_token']).then((credentials) => {
-				getUser().then((groups) => {
+		authenticate(response.getAuthResponse()['id_token']).then((credentials) => {
+			getUser().then((groups) => {
+				if(this.props.responseGoogle == null) {
 					if(groups.length > 0) {
 						self.props.login();
 					} else {
@@ -28,11 +29,15 @@ export default class LoginPage extends Component {
 							redirect : true
 						});
 					}
-				});
+				} else {
+					this.props.responseGoogle();
+				}
+			}).catch((error) => {
+				self.setState({
+					redirect : true
+				})
 			});
-		} else {
-			self.props.responseGoogle(response);
-		}
+		});
 	}
 
 	renderRedirect() {
@@ -48,7 +53,7 @@ export default class LoginPage extends Component {
 			<div>
 				{this.renderRedirect()}
 				<GoogleLogin
-				    clientId="635028903783-nh5o48irv1r78kubchg8rhpa690oa1ne.apps.googleusercontent.com"
+				    clientId={EnvironmentConfiguration.GOOGLE_CLIENT_ID}
 				    buttonText="Login"
 				    onSuccess={this.responseGoogle}
 				    onFailure={this.responseGoogle}

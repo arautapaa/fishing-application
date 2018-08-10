@@ -1,5 +1,6 @@
-const AWS = require('aws-sdk');
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const dynamoDb = require('../utils/dynamo-client').getClient();
+const async = require('async');
+const fs = require('fs');
 
 const actions = {
 	/**
@@ -139,7 +140,28 @@ const actions = {
 				}
 			});
 		});
+	},
+
+	initDefaultSelections : function(userId) {
+		const self = this;
+
+		fs.readFile('./src/data/initial-selections.json', 'utf8', (err, data) => {
+			console.log(data);
+
+			const results = JSON.parse(data);
+
+			Object.keys(results).forEach((key) => {
+				results[key].forEach((item) => {
+					self.createNewEntryForUser(userId, item).then(() => {
+
+					}).catch((error) => {
+
+					})
+				});
+			})
+		})
 	}
+
 };
 
 module.exports = actions;

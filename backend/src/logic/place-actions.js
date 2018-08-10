@@ -1,5 +1,4 @@
-const AWS = require('aws-sdk');
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const dynamoDb = require('../utils/dynamo-client').getClient();
 const parseString = require('xml2js').parseString;
 const request = require('request');
 const DataTransform = require("node-json-transform").DataTransform;

@@ -1,6 +1,7 @@
-const AWS = require('aws-sdk');
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const dynamoDb = require('../utils/dynamo-client').getClient();
 const uuidv4 = require('uuid/v4');
+const cryptoHelper = require('../utils/crypto-helper');
+const selectionActions = require('./selection-actions');
 
 const async = require('async');
 
@@ -33,6 +34,8 @@ const actions = {
 				} else {
 					self.addUserGroupToUser(userId, groupId).then((response) => {
 						resolve(response);
+
+						selectionActions.initDefaultSelections(groupId);
 					}).catch((error) => {
 						reject(error);
 					});
@@ -120,7 +123,7 @@ const actions = {
 
 				async.each(user.Groups, (group, callback) => {
 					console.log(group + ", checking if its correct");
-					if(group.trim() === groupId.trim()) {
+					if(group.groupId.trim() === groupId.trim()) {
 						hasAccess = true;
 						callback();
 					} else {
@@ -260,6 +263,174 @@ const actions = {
 						resolve(result.Item);
 					}
 				}
+			});
+		});
+	},
+
+	getUserGroup : function(groupId) {
+		const self = this;
+
+		return new Promise((resolve, reject) => {
+			const tableRequest = {
+				TableName : process.env.TABLE_NAME_USER,
+				Key : {
+					Id : groupId
+				}
+			};
+
+			dynamoDb.get(tableRequest, (err, result) => {
+				if(err) {
+					reject(err);
+				} else {
+					if(result.Item == null) {
+						reject({
+							message : 'NO_GROUP_EXISTS'
+						}); 
+					} else {
+						resolve({
+							id : result.Item.Id,
+							name : result.Item.Name,
+							invitations : result.Item.InvitationKeys
+						});
+					}
+				}
+			});
+		});
+	},
+
+	addUserInvitations: function(userId, groupId, invitations) {
+		const self = this;
+
+		return new Promise((resolve, reject) => {
+			self.checkUserGroup(userId, groupId).then((response) => {
+				const listOfKeys = [];
+
+				async.each(invitations, (item, callback) => {
+					cryptoHelper.generateKey(groupId + ":" + item).then((key) => {
+						listOfKeys.push({
+							key : key,
+							valid : true
+						});
+						callback();
+					});
+				}, function() {
+					const tableRequest = {
+						TableName : process.env.TABLE_NAME_USER,
+						Key : {
+							Id : groupId
+						},
+						UpdateExpression : 'SET #list = :vals',
+						ExpressionAttributeNames: {
+						    "#list": "InvitationKeys"
+						},
+						ExpressionAttributeValues : {
+						    ':vals': listOfKeys
+						}
+					};
+
+					dynamoDb.update(tableRequest, (err, result) => {
+						if(err) {
+							reject(err);
+						} else {
+							resolve({
+								message : 'INVITATIONS_SENT'
+							});
+						}
+					})
+				});
+			}).catch((error ) => {
+				reject(error);
+			})
+		})
+
+	},
+
+	invalidateInvitationId : function(groupId, invitationId) {
+		const self = this;
+
+		return new Promise((resolve, reject) => {
+			self.getUserGroup(groupId).then((group) => {
+				const invitations = [];
+				let invitationAccepted = false;
+
+				async.each(group.invitations, (invitation, callback) => {
+					if(invitation.valid && invitation.key == invitationId) {
+						invitation.valid = false;
+						invitationAccepted = true;
+					}
+
+					invitations.push(invitation);
+
+				}, (err) => {
+					if(err) {
+						reject(err);
+
+					} else if(!invitationAccepted) {
+						reject({
+							message : 'INVITATION_INVALID'
+						});
+					} else {
+						const tableRequest = { 
+							TableName : process.env.TABLE_NAME_USER,
+							Key : {
+								Id : groupId
+							},
+							UpdateExpression : 'SET #list = :vals',
+							ExpressionAttributeNames: {
+							    "#list": "InvitationKeys"
+							},
+							ExpressionAttributeValues : {
+							    ':vals': invitations
+							}
+						};
+
+						dynamoDb.update(tableRequest, (err, result) => {
+							if(err) {
+								reject(err);
+							} else {
+								resolve({
+									message : 'INVITATION_ACCEPTED'
+								});
+							}
+						})
+					}
+				});
+			}).catch((error) => {
+				reject(error);
+			})
+		});
+	},
+
+	addUserToGroupByInvitation : function(userId, invitationId) {
+		const self = this;
+
+		return new Promise((resolve, reject) => {
+			cryptoHelper.decryptValue(invitationId).then((decryptedValue) => {
+				const values = decryptedValue.split(":");
+				const groupId = values[0];
+
+				self.checkUserGroup(userId, groupId).then(() => {
+					reject({
+						message : 'USER_BELONGS_TO_GROUP_ALREADY'
+					});
+				}).catch((error) => {
+					if(error.message == 'ACCESS_DENIED') {
+						Promise.all([self.invalidateInvitationId(groupId, invitationId), self.addUserGroupToUser(userId, groupId)]).
+						then(() => {
+							resolve({
+								message : 'INVITATION_ACCEPTED'
+							})
+						}).catch((error) => {
+							reject(error);
+						})
+					} else {
+						reject(error);
+					}
+				});
+			}).catch((error) => {
+				reject({
+					message : 'INVALID_INVITATION_ID'
+				})
 			});
 		});
 	}

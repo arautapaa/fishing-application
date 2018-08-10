@@ -3,7 +3,7 @@ import Calendar from 'react-calendar';
 import TimePicker from 'react-times';
 import 'react-times/css/material/default.css';
 import { getLocation } from '../actions/Geolocator';
-import { GoogleMap, Marker, withGoogleMap,withScriptjs } from 'react-google-maps';
+import { ExtendedGoogleMap } from '../common/CustomGoogleMap';
 import InputRange from 'react-input-range';
 import 'react-input-range/lib/css/index.css';
 
@@ -32,10 +32,10 @@ export class BasicSelection extends Component {
 
   render() { 
     const items = this.props.items.map((item) => {
-      let selector = "btn btn-dark";
+      let selector = "btn btn-primary";
 
       if(item.name == this.state.selectedValue) {
-        selector += " active";
+        selector = "btn btn-danger";
       }
       return (<button className={selector} key={item.name} onClick={() => this.onClick(item)}>
         {item.name}
@@ -60,12 +60,35 @@ export class PlaceSelection extends Component {
   constructor(props) {
     super(props);
 
+    let latitude = null;
+    let longitude = null;
+
+    if(props.places != null && props.places.length > 0) {
+        latitude = props.places[0].latitude;
+        longitude = props.places[0].longitude;
+    }
+
     this.state = {
-      selectedValue : null
+      selectedValue : null,
+      latitude : latitude,
+      longitude : longitude
     }
 
     this.onClick = this.onClick.bind(this);
     this.findMe = this.findMe.bind(this);
+    this.markerClick = this.markerClick.bind(this);
+  }
+
+  componentDidUpdate(prevProps) {
+      console.log(prevProps);
+
+    if(prevProps.places.length == 0 && this.props.places.length > 0) {
+        this.setState({
+            latitude : this.props.places[0].latitude,
+            longitude : this.props.places[0].longitude
+        })
+
+    }
   }
 
   findMe() {
@@ -84,24 +107,34 @@ export class PlaceSelection extends Component {
     });
   }
 
-  onClick(item) {
+  markerClick(index) {
+    const places = this.props.places.slice();
+    const item = places[index];
+    
+    places.forEach((place, i) => {
+      place.selected = (i == index);
+    });
+
     this.setState({
-      selectedValue : item.id,
-      latitude : item.latitude,
-      longitude : item.longitude
+      places : places,
+      selectedValue : item.id
     });
 
     this.props.onSelectionChange(item);
   }
 
+  onClick(index) {
+    this.markerClick(index);
+  }
+
   render() {
-    const items = this.props.places.map((item) => {
-      let selector = "btn btn-dark";
+    const items = this.props.places.map((item, index) => {
+      let selector = "btn btn-primary";
 
       if(item.id == this.state.selectedValue) {
-        selector += " active";
+        selector = "btn btn-danger";
       }
-      return (<button className={selector} key={item.id} onClick={() => this.onClick(item)}>
+      return (<button className={selector} key={item.id} onClick={() => this.onClick(index)}>
         {item.name}
       </button>);
     });
@@ -109,13 +142,15 @@ export class PlaceSelection extends Component {
     let map = <span>Map placeholder</span>;
 
     if(this.state.latitude && this.state.longitude) {
-      map = <MyMapComponent
-        googleMapURL="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places"
-        loadingElement={<div style={{ height: `100%` }} />}
-        containerElement={<div style={{ height: `400px` }} />}
-        mapElement={<div style={{ height: `100%` }} />}
-        position={{ lat: this.state.latitude, lng: this.state.longitude }}
-        defaultZoom={8}
+      map = <ExtendedGoogleMap
+          googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCpgoPa6EbBkJOK1m01CcZLN1nHeFkhuRQ&v=3.exp&libraries=geometry,drawing,places"
+          loadingElement={<div style={{ height: `100%` }} />}
+          containerElement={<div style={{ height: `400px` }} />}
+          mapElement={<div style={{ height: `100%` }} />}
+          position={{ lat: this.state.latitude, lng: this.state.longitude }}
+          defaultZoom={16}
+          places={this.props.places}
+          markerClick={this.markerClick}
       />
     }
 
@@ -142,10 +177,6 @@ export class PlaceSelection extends Component {
   }
 }
 
-const MyMapComponent = withScriptjs(withGoogleMap(props => {
-  return <GoogleMap defaultZoom={props.defaultZoom} defaultCenter={props.position}><Marker position={props.position}/></GoogleMap>
-}))
-
 export class WeightSelection extends Component {
   constructor(props) {
     super(props);
@@ -166,6 +197,8 @@ export class WeightSelection extends Component {
   }
 
   changeGrams(value){
+    console.log(value);
+
     this.setState({g: value});
     this.props.handleChange(this.getTotal());
   }
@@ -186,16 +219,59 @@ export class WeightSelection extends Component {
     return (this.state.kg * 1000) + parseInt(this.state.g);
   }
 
+  getKilogramButtons() {
+    if(this.props.fish != null) {
+      const buttons = [];
+
+
+
+      for(let i = this.props.fish.additionalAttributes.weight.range.min; i <= this.props.fish.additionalAttributes.weight.range.max; i++) {
+        let buttonClass = "btn btn-primary";
+
+        if(i == this.state.kg) {
+            buttonClass = "btn btn-danger";
+        }
+
+          buttons.push(<button className={buttonClass} onClick={() => this.changeKilograms(i)}>{i}</button>)
+      }
+
+      return buttons;
+    }
+  }
+
+
+  getGramButtons() {
+    if(this.props.fish != null) {
+      const buttons = [];
+
+      for(let i = 0; i < 1000; i = i + this.props.fish.additionalAttributes.weight.range.steps) {
+        let buttonClass = "btn btn-primary";
+
+        if(i == this.state.g) {
+            buttonClass = "btn btn-danger";
+        }
+        buttons.push(<button className={buttonClass} onClick={() => this.changeGrams(i)}>{i}</button>);
+      }
+
+      return buttons;
+    }
+  }
+
   render() {  
     return(
-    	<div className="row">
-        <strong>kg</strong>
-        <InputRange step={1} minValue={0} maxValue={10} value={this.state.kg} onChange={this.changeKilograms} />
-
-        <strong>g</strong>
-        <InputRange step={50} minValue={0} maxValue={999} value={this.state.g} onChange={this.changeGrams} />
-
-        <strong>Total weight: {this.getTotal()}</strong>
+      <div>
+        <div className="row">
+          <strong>Total weight</strong>
+          {this.getTotal()}
+        </div>
+      	<div className="row">
+          <strong>kg</strong>
+          {this.getKilogramButtons()}
+        </div>
+        <div className="row">
+          <strong>g</strong>
+          {this.getGramButtons()}
+        </div>
       </div>
     );
   }

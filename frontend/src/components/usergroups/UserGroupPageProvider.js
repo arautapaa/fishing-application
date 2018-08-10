@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { updateData } from '../actions/DraughtServices';
+import { sendRequest } from '../actions/DraughtServices';
 import { Redirect } from 'react-router-dom';
 
 export default class UserGroupPageProvider extends Component {
@@ -8,7 +8,7 @@ export default class UserGroupPageProvider extends Component {
 		super(props);
 
 		this.state = {
-			userGroupId : "",
+			diaryName : "",
 			redirect : false
 		}
 		this.handleInputChange = this.handleInputChange.bind(this);
@@ -17,14 +17,16 @@ export default class UserGroupPageProvider extends Component {
 
 	handleInputChange(event) {
 		this.setState({
-			userGroupId : event.target.value
+			diaryName : event.target.value
 		});
 	}
 
 	addUserGroup() {
 		const self = this;
 
-		updateData('/user/groups/' + this.state.userGroupId, 'PUT', {}).then(() => {
+		sendRequest('/user/groups/', 'POST', {
+			name : this.state.diaryName
+		}).then(() => {
 			self.setState({
 				redirect : true
 			})
@@ -34,7 +36,7 @@ export default class UserGroupPageProvider extends Component {
 	renderRedirect() {
 		if(this.state.redirect) {
 			return(
-				<Redirect to="/" />
+				<Redirect to="/groups/places" />
 			)
 		}
 	}
@@ -43,13 +45,17 @@ export default class UserGroupPageProvider extends Component {
 		return(
 			<div className="container">
 				{this.renderRedirect()}
+				<h1>Welcome to use Fishing Diary Application</h1>
+				<p>First of all, we want you to create diary with a name.</p>
+				<p>You can create multiple diaries for etc. different places like salmon fishing in Lapland or summer cottage fishing in the middle of nowhere etc.</p>
+				<p>You can also invite your friends also to the diary so you can share your fishing places and even compete against each other!</p>
 				<div className="form-group">
 					<label>
-						Set user group id
+						Set diary name
 					</label>
-					<input type="text" className="form-control" value={this.state.userGroupId} onChange={this.handleInputChange}/>
+					<input type="text" className="form-control" value={this.state.diaryName} onChange={this.handleInputChange}/>
 					<button className="btn btn-primary" onClick={this.addUserGroup}>
-						Add user to user group
+						Add new diary
 					</button>
 				</div>
 			</div>

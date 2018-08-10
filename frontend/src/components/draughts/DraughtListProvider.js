@@ -13,17 +13,14 @@ export default class DraughtListProvider extends Component {
 	}
 
 	getPlace(placeId) {
-		console.log(placeId);
-
 		const filtered = this.state.places.filter((item) => { return item.id == placeId})
-		console.log(filtered);
 
 		return filtered[0];
 	}
 
 	componentDidMount() {
 		Promise.all([fetchData('/draughts'), fetchData('/places')]).then((response) => {
-			let draughts = response[0].data;
+			let draughts = response[0];
 
 			draughts.sort((a, b) => {
 				if(b.catchTime > a.catchTime) {
@@ -35,7 +32,7 @@ export default class DraughtListProvider extends Component {
 
 			this.setState({
 				draughts : draughts,
-				places : response[1].data
+				places : response[1]
 			});
 		}).catch((error) => {
 

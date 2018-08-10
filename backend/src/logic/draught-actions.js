@@ -1,5 +1,4 @@
-const AWS = require('aws-sdk');
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const dynamoDb = require('../utils/dynamo-client').getClient();
 const async = require('async');
 const uuidv4 = require('uuid/v4');
 

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { BasicSelection, PlaceSelection, WeightSelection, DateSelection } from './Selections';
 import { AdditionalAttributes } from './AdditionalAttributes';
-import { saveDraught } from '../actions/DraughtServices';
+import { sendRequest } from '../actions/DraughtServices';
 
 class AddEntry extends Component {
 	constructor(props) {
@@ -15,9 +15,11 @@ class AddEntry extends Component {
 			  	gear : null,
 			  	fisher : null,
 			  	weight : null,
-			  	catchTime : null,
-			  	additionalAttributes : null
-			}
+			  	catchTime : new Date(),
+			  	additionalAttributes : []
+			},
+			saved : false,
+			errorMessage : null
 		}
 
 		this.handleFishChange = this.handleFishChange.bind(this);
@@ -69,53 +71,92 @@ class AddEntry extends Component {
 		this.handleChange('additionalAttributes', attributes);
 	}
 
+	getForm() {
+		return(<div className="container">  
+	    		<BasicSelection title="Fish" items={this.props.selections.fish} 
+	    			onSelectionChange={this.handleFishChange}
+	    		/>
+	    		<PlaceSelection places={this.props.places} 
+	    			onSelectionChange={this.handlePlaceChange}
+	    		/>
+	    		<BasicSelection title="Fisher" items={this.props.selections.fisher} 
+	    			onSelectionChange={this.handleFisherChange}
+	    		/>
+	    		<BasicSelection title="Gear" items={this.props.selections.gear} 
+	    			onSelectionChange={this.handleGearChange}
+	    		/>
+	    		<WeightSelection fish={this.state.selected.fish} 
+	    			handleChange={this.handleWeightChange}
+	    		/>
+	    		<DateSelection 
+	    			handleTimeChange={this.handleTimeChange}
+	    		/>
+	    		<AdditionalAttributes handleChange={this.handleAttributeChange} />
+	    		{JSON.stringify(this.state.selected)}
 
+	    		<button className="btn btn-danger" onClick={this.save}>
+	    			Save
+	    		</button>
+	    	</div>
+    	);
+	}
+
+	getSaveNotification() {
+		return(<div className="container">
+			<span>Saved successfully</span>
+		</div>)
+	}
+
+	validateForm(draught) {
+		let message = "";
+
+		Object.keys(draught).forEach((key) => {
+			if(draught[key] == null) {
+				message += key + " cant be invalid<br/>";
+			}
+		});
+
+		return message;
+	}
 
 	save() {
-		console.log(this.state.selected);
 		const draught = this.state.selected;
+		const self = this;
 
-		saveDraught({
-			fish : draught.fish.name,
-			gear : draught.gear.name,
-			fisher : draught.fisher.name,
-			placeId : draught.place.id,
-			weight : draught.weight,
-			catchTime : draught.catchTime.toISOString(),
-			additionalAttributes : draught.additionalAttributes
-		}).then((response) => {
-			console.log("JIPPII");
-		})
+		const errorMessage = this.validateForm(draught)
+
+		if(errorMessage.length == 0) {
+			sendRequest('/draughts', 'POST',{
+				fish : draught.fish.name,
+				gear : draught.gear.name,
+				fisher : draught.fisher.name,
+				placeId : draught.place.id,
+				weight : draught.weight,
+				catchTime : draught.catchTime.toISOString(),
+				additionalAttributes : draught.additionalAttributes
+			}).then((response) => {
+				this.setState({
+					saved : true
+				});
+			})
+		} else {
+			this.setState({
+				errorMessage : errorMessage
+			})
+		}
 	}
   render() {
+  	let containerToPrint = this.getForm();
+
+  	if(this.state.saved) {
+  		containerToPrint = this.getSaveNotification();
+  	}
+
     return(
-    	<div className="container">  
-
-    		<BasicSelection title="Fish" items={this.props.selections.fish} 
-    			onSelectionChange={this.handleFishChange}
-    		/>
-    		<PlaceSelection places={this.props.places} 
-    			onSelectionChange={this.handlePlaceChange}
-    		/>
-    		<BasicSelection title="Fisher" items={this.props.selections.fisher} 
-    			onSelectionChange={this.handleFisherChange}
-    		/>
-    		<BasicSelection title="Gear" items={this.props.selections.gear} 
-    			onSelectionChange={this.handleGearChange}
-    		/>
-    		<WeightSelection fish={this.state.selected.fish} 
-    			handleChange={this.handleWeightChange}
-    		/>
-    		<DateSelection 
-    			handleTimeChange={this.handleTimeChange}
-    		/>
-    		<AdditionalAttributes handleChange={this.handleAttributeChange} />
-    		{JSON.stringify(this.state.selected)}
-
-    		<button className="btn btn-danger" onClick={this.save}>
-    			Save
-    		</button>
-    	</div>
+    	<section>
+    		<strong>{this.state.errorMessage}</strong>
+    		{containerToPrint}
+    	</section>
     );
   }
 }

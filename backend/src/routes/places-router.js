@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const async = require('async');
 
 const actions = require('../logic/place-actions.js');
 
@@ -16,11 +17,37 @@ router.get('/', function(req, res) {
 router.post('/', function(req, res) {
 	const userId = req.selectedUserGroup;
 
-	actions.addNewPlace(userId, req.body).then(response => {
-		res.status(201).send(response);
-	}).catch(error => {
-		res.status(400).send(error);
-	});
+	if(Array.isArray(req.body)) {
+		async.each(req.body, (item, callback) => {
+			if(item.id == null) {
+				actions.addNewPlace(userId, item).then(response => {
+					callback();
+				}).catch((error) => {
+					callback(error);
+				});
+			} else {
+				actions.updatePlace(userId, item).then(response => {
+					callback();
+				}).catch((error) => {
+					callback(error);
+				});
+			}
+		}, (err) => {
+			if(error) {
+				res.status(400).send(error);
+			} else {
+				res.status(201).send({success : true});
+			}	
+		});
+	} else {
+		actions.addNewPlace(userId, req.body).then(response => {
+			res.status(201).send(response);
+		}).catch(error => {
+			res.status(400).send(error);
+		});
+	}
+
+
 });
 
 router.get('/:id', function(req, res) {

@@ -4,10 +4,10 @@ import { fetchData } from './DraughtServices';
 
 export function authenticate(id_token) {
 	return new Promise((resolve, reject) => {
-		AWS.config.region = 'eu-central-1';	
+		AWS.config.region = process.env.AWS_REGION;	
 
 		const credentials = new AWS.CognitoIdentityCredentials({
-		    IdentityPoolId: 'eu-central-1:d12da3ad-b046-4694-890b-16852ac4d39e',
+		    IdentityPoolId: process.env.COGNITO_IDENTITY_POOL_ID,
 			Logins : {
 				'accounts.google.com' : id_token
 			}
@@ -27,8 +27,11 @@ export function authenticate(id_token) {
 
 export function getUser() {
 	return new Promise((resolve, reject) => {
-		fetchData('/user/groups', (response) => {
-			resolve(response.data);
+		fetchData('/user/groups').then((response) => {
+			console.log(response);
+			resolve(response);
+		}).catch((error) => {
+			reject(error);
 		});
 	});
 }
@@ -50,4 +53,14 @@ export function getCredentials() {
 		'secretAccessKey' : cookies.get('secretAccessKey'),
 		'sessionToken' : cookies.get('sessionToken')
 	}
+}
+
+export function setNoUserGroupCookie() {
+	const cookies = new Cookies();
+	cookies.set('hasNoUserGroup', true, { expires : 900 });
+}
+
+export function hasUserGroup() {
+	const cookies = new Cookies();
+	return cookies.get('hasNoUserGroup');
 }

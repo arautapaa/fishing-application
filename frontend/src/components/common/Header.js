@@ -7,6 +7,7 @@ export default class Header extends Component {
 			<ul>
 				<li><Link to='/'>Home</Link></li>
 	        	<li><Link to='/add'>New entry</Link></li>
+	        	<li><Link to="/groups/places">Places</Link></li>
 			</ul>
 		);
 	}
