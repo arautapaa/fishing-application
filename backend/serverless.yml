@@ -16,7 +16,9 @@ provider:
     FMI_API_URL: http://data.fmi.fi/fmi-apikey/{apikey}/wfs
     FMI_API_KEY: e60d6126-3819-41ee-91e5-08cc4bb12cc2
     COGNITO_IDENTITY_POOL_ID: eu-central-1:d12da3ad-b046-4694-890b-16852ac4d39e
-    AWS_REGION: eu-central-1
+    APP_AWS_REGION: eu-central-1
+    AWS_APP_DOMAIN: http://test-draught-application.s3-website.eu-central-1.amazonaws.com
+    EMAIL_SENDER: antti.rautapaa@gmail.com
   iamRoleStatements:
     - Effect: Allow
       Action:

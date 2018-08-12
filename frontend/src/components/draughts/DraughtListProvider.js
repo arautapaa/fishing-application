@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { fetchData } from '../actions/DraughtServices';
+import { Redirect} from 'react-router-dom';
 
 export default class DraughtListProvider extends Component {
 
@@ -10,6 +11,8 @@ export default class DraughtListProvider extends Component {
 			draughts : [],
 			places : []
 		}
+
+		this.goTo = this.goTo.bind(this);
 	}
 
 	getPlace(placeId) {
@@ -39,13 +42,31 @@ export default class DraughtListProvider extends Component {
 		})		
 	}
 
+	goTo(id) {
+		this.setState({
+			redirectId : id
+		})
+	}
+
+	getRedirect() {
+		if(this.state.redirectId) {
+			const id = "/draughts/" + this.state.redirectId;
+
+			return <Redirect to={id} />
+		}
+	}
+
+
+
 
 	render() {
+		const redirect = this.getRedirect(); 
+
 		const items = this.state.draughts.map((item) => {
 
       		const temperature = item.weather ? item.weather.temperature : null;
 
-      		return(<tr>
+      		return(<tr onClick={() => {this.goTo(item.id)}}>
       			<td>{item.id}</td>
       			<td>{item.fish}</td>
       			<td>{item.fisher}</td>
@@ -58,24 +79,29 @@ export default class DraughtListProvider extends Component {
     	});
 
 		return(
-			<table className="table">
-				<thead>
-					<tr>
-						<th>ID</th>
-						<th>Fish</th>
-						<th>Fisher</th>
-						<th>Gear</th>
-						<th>Temperature</th>
-						<th>Weight</th>
-						<th>CatchDate</th>
-						<th>Place</th>
-					</tr>
-				</thead>
-				<tbody>
-					{items}
-				</tbody>
-			</table>
-		);
+			<div className="container">
+				<div className="row col-xs-12">
+					<table className="table">
+						<thead>
+							<tr>
+								<th>ID</th>
+								<th>Fish</th>
+								<th>Fisher</th>
+								<th>Gear</th>
+								<th>Temperature</th>
+								<th>Weight</th>
+								<th>CatchDate</th>
+								<th>Place</th>
+							</tr>
+						</thead>
+						<tbody>
+							{items}
+						</tbody>
+					</table>
+					{redirect}
+				</div>
+			</div>
+		)
 
 	}
 }

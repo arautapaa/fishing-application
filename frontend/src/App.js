@@ -10,6 +10,7 @@ import UserInvitationAcceptProvider from './components/userinvitation/UserInvita
 import UserGroupPlacePageProvider from './components/usergroups/UserGroupPlacePageProvider';
 import Header from './components/common/Header';
 import { Switch, Route } from 'react-router-dom';
+import DraughtPageProvider from './components/draughts/DraughtPageProvider';
 
 class App extends Component {
   render() {
@@ -24,6 +25,7 @@ class App extends Component {
           <Route path='/groups/invite' component={UserGroupInvitePageProvider} />
           <Route path='/invitation/:id' component={UserInvitationAcceptProvider} />
           <Route path='/groups/places' component={UserGroupPlacePageProvider} />
+          <Route path='/draughts/:id' component={DraughtPageProvider} />
         </Switch>
             
       </div>

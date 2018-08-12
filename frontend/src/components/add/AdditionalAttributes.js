@@ -28,8 +28,8 @@ export class AdditionalAttributes extends Component {
 		const attributes = this.state.attributes;
 
 		attributes.push({
-			name : 'Test',
-			value : 'Value'
+			name : '',
+			value : ''
 		});
 
 		this.setState({
@@ -43,7 +43,7 @@ export class AdditionalAttributes extends Component {
 		});
 
 		return(
-			<div>
+			<div className="row">
 				{elements}
 				<button className="btn btn-primary" onClick={this.onClick}>
 					Add new
@@ -81,7 +81,6 @@ class AdditionalAttribute extends Component {
 				<label>
 					Name
 				</label>
-				{this.props.index}
 				<input type="text" name="name" value={this.state.name} onChange={this.handleChange} />
 				<label>
 					Value

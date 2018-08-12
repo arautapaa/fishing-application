@@ -19,7 +19,11 @@
         "MAPQUEST_API_KEY": "guV130UjWto7EWHS4hrtfH6lWPQMcHg4",
         "MAPQUEST_API_URL": "http://open.mapquestapi.com/geocoding/v1/reverse",
         "FMI_API_URL": "http://data.fmi.fi/fmi-apikey/{apikey}/wfs",
-        "FMI_API_KEY": "e60d6126-3819-41ee-91e5-08cc4bb12cc2"
+        "FMI_API_KEY": "e60d6126-3819-41ee-91e5-08cc4bb12cc2",
+        "COGNITO_IDENTITY_POOL_ID": "eu-central-1:d12da3ad-b046-4694-890b-16852ac4d39e",
+        "APP_AWS_REGION": "eu-central-1",
+        "AWS_APP_DOMAIN": "http://test-draught-application.s3-website.eu-central-1.amazonaws.com",
+        "EMAIL_SENDER": "antti.rautapaa@gmail.com"
       },
       "iamRoleStatements": [
         {
@@ -160,7 +164,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/draught-service/dev/1532868894473-2018-07-29T12:54:54.473Z/draught-service.zip"
+                "S3Key": "serverless/draught-service/dev/1534063766328-2018-08-12T08:49:26.328Z/draught-service.zip"
               },
               "FunctionName": "draught-service-dev-app",
               "Handler": "src/server.handler",
@@ -182,7 +186,11 @@
                   "MAPQUEST_API_KEY": "guV130UjWto7EWHS4hrtfH6lWPQMcHg4",
                   "MAPQUEST_API_URL": "http://open.mapquestapi.com/geocoding/v1/reverse",
                   "FMI_API_URL": "http://data.fmi.fi/fmi-apikey/{apikey}/wfs",
-                  "FMI_API_KEY": "e60d6126-3819-41ee-91e5-08cc4bb12cc2"
+                  "FMI_API_KEY": "e60d6126-3819-41ee-91e5-08cc4bb12cc2",
+                  "COGNITO_IDENTITY_POOL_ID": "eu-central-1:d12da3ad-b046-4694-890b-16852ac4d39e",
+                  "APP_AWS_REGION": "eu-central-1",
+                  "AWS_APP_DOMAIN": "http://test-draught-application.s3-website.eu-central-1.amazonaws.com",
+                  "EMAIL_SENDER": "antti.rautapaa@gmail.com"
                 }
               }
             },
@@ -191,14 +199,14 @@
               "IamRoleLambdaExecution"
             ]
           },
-          "AppLambdaVersionl3WoPjufBM5EDnB1zN4HdoEW6CuD8AhoJopLtbhvo": {
+          "AppLambdaVersionwT0hiaukkXawJSKKSMpKVtJdLXwovPL0IgN0i9AJt8": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "AppLambdaFunction"
               },
-              "CodeSha256": "/+mMC+j86H0uCdAnRAFa3ikzzhawsMeMhfId8cC6JK0="
+              "CodeSha256": "BZfEJ6m/3dkKvUhVd65T5GsO95zV3rh4MCyA0CslxLc="
             }
           },
           "ApiGatewayRestApi": {
@@ -316,7 +324,7 @@
               "MethodResponses": []
             }
           },
-          "ApiGatewayDeployment1532868894567": {
+          "ApiGatewayDeployment1534063766391": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -386,7 +394,7 @@
           "AppLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "AppLambdaVersionl3WoPjufBM5EDnB1zN4HdoEW6CuD8AhoJopLtbhvo"
+              "Ref": "AppLambdaVersionwT0hiaukkXawJSKKSMpKVtJdLXwovPL0IgN0i9AJt8"
             }
           },
           "ServiceEndpoint": {
@@ -452,10 +460,10 @@
         "vpc": {}
       }
     },
-    "artifact": "D:\\galastus\\fishing-application\\backend\\.serverless\\draught-service.zip"
+    "artifact": "/opt/gittest/fishing-application/backend/.serverless/draught-service.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/draught-service/dev/1532868894473-2018-07-29T12:54:54.473Z",
+    "artifactDirectoryName": "serverless/draught-service/dev/1534063766328-2018-08-12T08:49:26.328Z",
     "artifact": "draught-service.zip"
   }
 }

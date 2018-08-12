@@ -2,6 +2,7 @@ const dynamoDb = require('../utils/dynamo-client').getClient();
 const uuidv4 = require('uuid/v4');
 const cryptoHelper = require('../utils/crypto-helper');
 const selectionActions = require('./selection-actions');
+const emailService = require('../utils/email-client');
 
 const async = require('async');
 
@@ -65,7 +66,8 @@ const actions = {
 					},
 					ExpressionAttributeValues : {
 					    ':vals': [{
-					    	groupId : groupId
+					    	groupId : groupId,
+					    	selected : true
 					    }]
 					}
 				};
@@ -298,6 +300,29 @@ const actions = {
 		});
 	},
 
+	sendInvitationEmail : function(email, inviteKey) {
+		const emailParams = {
+			Destination : {
+				ToAddresses : [email]
+			},
+			Message : {
+				Body : {
+					Text : {
+						Data : "I would like to invite you to use my fishing diary " + process.env.AWS_APP_DOMAIN + "/invitation/" + inviteKey 
+						
+					}
+				}, 
+				Subject : {
+					Data : "Invitation to fishing diary"
+				}
+
+			},
+			Source : process.env.EMAIL_SENDER
+		};
+
+		emailService.sendEmail(emailParams);
+	},
+
 	addUserInvitations: function(userId, groupId, invitations) {
 		const self = this;
 
@@ -311,6 +336,9 @@ const actions = {
 							key : key,
 							valid : true
 						});
+
+						self.sendInvitationEmail(item, key);
+
 						callback();
 					});
 				}, function() {

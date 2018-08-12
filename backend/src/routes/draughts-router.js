@@ -41,7 +41,18 @@ router.get('/:id', function(req, res) {
 })
 
 router.delete('/:id', function(req, res) {
-	res.send({ hello : "all"});
+	const groupId = req.selectedUserGroup;
+	const draughtId = req.params.id;
+
+	actions.deleteDraught(groupId, draughtId).then((response) => {
+		res.send(response);
+	}).catch((error) => {
+		if(error.key == 'NO_ENTRY_FOUND') {
+			res.status(404).send(error);
+		} else {
+			res.status(400).send(error);
+		}
+	});
 });
 
 router.put('/:id', function(req, res) {

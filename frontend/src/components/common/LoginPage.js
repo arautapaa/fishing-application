@@ -50,7 +50,7 @@ export default class LoginPage extends Component {
 
 
 		return(
-			<div>
+			<div className="container">
 				{this.renderRedirect()}
 				<GoogleLogin
 				    clientId={EnvironmentConfiguration.GOOGLE_CLIENT_ID}

@@ -140,6 +140,34 @@ const actions = {
 				});	
 			}
 		});
+	}, 
+
+	deleteDraught : function(groupId, draughtId) {
+		const self = this;
+
+		return new Promise((resolve, reject) => {
+			self.getOneDraught(groupId, draughtId).then((response) => {
+				const tableRequest = {
+					TableName : process.env.TABLE_NAME_DRAUGHTS,
+					Key : {
+						UserId : groupId,
+						DraughtId : draughtId
+					}
+				};
+
+				dynamoDb.delete(tableRequest, (err, result) => {
+					if(err) {
+						reject(error);
+					} else {
+						resolve({
+							deleted : draughtId
+						})
+					}
+				})
+			}).catch((error) => {
+				reject(error);
+			})
+		})
 	}
 }
 

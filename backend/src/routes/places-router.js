@@ -54,7 +54,7 @@ router.get('/:id', function(req, res) {
 	const userId = req.selectedUserGroup;
 	const placeId = req.params.id;
 
-	actions.getPlace(userId, id).then(place => {
+	actions.getPlace(userId, placeId).then(place => {
 		res.send(place);
 	}).catch(error => {
 		if(error.key == 'NO_PLACE_FOUND') {

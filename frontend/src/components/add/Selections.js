@@ -12,7 +12,7 @@ export class BasicSelection extends Component {
     super(props);
 
     this.state = {
-      selectedValue : null
+      selectedValue : props.selectedValue != null ? props.selectedValue.name : null
     }
 
     this.onClick = this.onClick.bind(this);
@@ -45,7 +45,6 @@ export class BasicSelection extends Component {
     return(
       <div className="row">
         <h3>{this.props.title}</h3>
-        <strong>Selected: {this.state.selectedValue}</strong>
         <div className="row">
           <div className="col-xs-12">
             {items}
@@ -69,9 +68,9 @@ export class PlaceSelection extends Component {
     }
 
     this.state = {
-      selectedValue : null,
-      latitude : latitude,
-      longitude : longitude
+      selectedValue : props.selectedValue != null ? props.selectedValue.id : null,
+      latitude : parseFloat(latitude),
+      longitude : parseFloat(longitude)
     }
 
     this.onClick = this.onClick.bind(this);
@@ -80,19 +79,16 @@ export class PlaceSelection extends Component {
   }
 
   componentDidUpdate(prevProps) {
-      console.log(prevProps);
-
     if(prevProps.places.length == 0 && this.props.places.length > 0) {
         this.setState({
-            latitude : this.props.places[0].latitude,
-            longitude : this.props.places[0].longitude
+            latitude : parseFloat(this.props.places[0].latitude),
+            longitude : parseFloat(this.props.places[0].longitude)
         })
 
     }
   }
 
   findMe() {
-    console.log("Found");
 
     getLocation().then((location) => {
       this.setState({
@@ -158,7 +154,6 @@ export class PlaceSelection extends Component {
     return(
       <div className="row">
         <h3>Place</h3>
-        <strong>Selected: {this.state.selectedValue}</strong>
         <div className="row">
           <div className="col-xs-12">
             {items}
@@ -181,9 +176,12 @@ export class WeightSelection extends Component {
   constructor(props) {
     super(props);
 
+    const kg =  parseInt(props.selectedValue / 1000) || 0;
+    const g = props.selectedValue - (kg) * 1000 || 0;
+
     this.state = {
-      kg : 0,
-      g : 0
+      kg : kg,
+      g : g
     }
 
     this.changeKilograms = this.changeKilograms.bind(this);
@@ -191,16 +189,18 @@ export class WeightSelection extends Component {
   }
 
   changeKilograms(value){
-    this.setState({kg: value});
+    this.setState({kg: value}, () => {
+      this.props.handleChange(this.getTotal());
+    });
 
-    this.props.handleChange(this.getTotal());
   }
 
   changeGrams(value){
-    console.log(value);
 
-    this.setState({g: value});
-    this.props.handleChange(this.getTotal());
+
+    this.setState({g: value}, () => {
+        this.props.handleChange(this.getTotal());
+    });
   }
 
   componentDidUpdate(prevProps) {
@@ -257,23 +257,27 @@ export class WeightSelection extends Component {
     }
   }
 
-  render() {  
-    return(
-      <div>
-        <div className="row">
-          <strong>Total weight</strong>
-          {this.getTotal()}
+  render() {
+    if(this.props.fish != null) {  
+      return(
+        <div>
+          <div className="row">
+            <strong>Total weight</strong>
+            {this.getTotal()}
+          </div>
+        	<div className="row">
+            <strong>kg</strong>
+            {this.getKilogramButtons()}
+          </div>
+          <div className="row">
+            <strong>g</strong>
+            {this.getGramButtons()}
+          </div>
         </div>
-      	<div className="row">
-          <strong>kg</strong>
-          {this.getKilogramButtons()}
-        </div>
-        <div className="row">
-          <strong>g</strong>
-          {this.getGramButtons()}
-        </div>
-      </div>
-    );
+      );
+    } else {
+      return null;
+    }
   }
 }
 
@@ -281,10 +285,12 @@ export class DateSelection extends Component {
   constructor(props) {
     super(props);
 
+    const date = props.selectedValue != null ? new Date(props.selectedValue) : new Date()
+
     this.state = {
-      date : new Date(),
-      hour : '20',
-      minute : '00'
+      date : date,
+      hour : date.getHours(),
+      minute : date.getMinutes()
     }
 
     this.onChange = this.onChange.bind(this)
@@ -327,13 +333,11 @@ export class DateSelection extends Component {
 	render() {
 		return(
       <div className="row">
-        <strong>{this.state.date.toLocaleString()}</strong>
         <Calendar 
           value={this.state.date} 
           onChange={this.onChange}
           />
         <TimePicker onTimeChange={this.onTimeChange} time={this.getTime()} />
-        <strong>{this.state.hour}:{this.state.minute}</strong>
       </div>
 		);
 	}

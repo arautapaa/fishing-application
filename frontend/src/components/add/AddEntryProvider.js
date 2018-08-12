@@ -23,6 +23,11 @@ export default class AddEntryProvider extends Component {
 				} else {
 					return 1;
 				}
+			});
+
+			data.places.forEach((item) => {
+				item.latitude = parseFloat(item.latitude);
+				item.longitude = parseFloat(item.longitude);
 			})
 
 			self.setState({

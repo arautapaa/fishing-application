@@ -27,7 +27,11 @@ export default class UserGroupPlacePageProvider extends Component {
 		console.log("Get places");
 
 		sendRequest('/places', 'GET', {}).then((places) => {
-			console.log(places);
+			places.forEach((item) => {
+				item.latitude = parseFloat(item.latitude);
+				item.longitude = parseFloat(item.longitude);
+			});
+
 			this.setState({
 				places : places
 			});
@@ -113,7 +117,11 @@ export default class UserGroupPlacePageProvider extends Component {
 	}
 
 	save() {
-		sendRequest('/places', 'POST', this.state.places).then((response) => {
+		const placesToSave = this.state.places.filter((item) => {
+			return item.id == null;
+		});
+
+		sendRequest('/places', 'POST', placesToSave).then((response) => {
 			this.setState({
 				redirect : true
 			})
