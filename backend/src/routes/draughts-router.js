@@ -7,7 +7,6 @@ router.get('/', function(req, res) {
 	const userId = req.selectedUserGroup;
 
 	actions.getDraughtsForUser(userId).then((response) => {
-		console.log(JSON.stringify(response));
 		res.send(response);
 	}).catch((error) => {
 		res.status(400).send(error);
@@ -19,7 +18,7 @@ router.post('/', function(req, res) {
 	const draught = req.body;
 
 	actions.saveDraught(userId, draught).then((draught) => {
-		res.status(201).send(draught);
+		res.send(draught);
 	}).catch((error) => {
 		res.status(400).send(error);
 	})
@@ -56,7 +55,16 @@ router.delete('/:id', function(req, res) {
 });
 
 router.put('/:id', function(req, res) {
-	res.send({ hello : "all"});
+	const groupId = req.selectedUserGroup;
+	const draughtId = req.params.id;
+
+	const draught = req.body;
+
+	actions.updateDraught(groupId, draughtId, draught).then((response) => {
+		res.send(response);
+	}).catch((error) => {
+		res.status(400).send(error);
+	})
 });
 
 module.exports = router;

@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { isLoggedIn, authenticate, getUser } from '../actions/Authentication';
+import AuthenticationAPI from '../../api/authentication';
 import GoogleLogin from 'react-google-login';
 import { Redirect } from 'react-router-dom';
 import * as EnvironmentConfiguration from '../../environment';
 
-export default class LoginPage extends Component {
+class LoginPage extends Component {
 	constructor(props) {
 
 		super(props);
@@ -19,30 +19,16 @@ export default class LoginPage extends Component {
 	responseGoogle(response) {
 		const self = this;
 
-		authenticate(response.getAuthResponse()['id_token']).then((credentials) => {
-			getUser().then((groups) => {
-				if(this.props.responseGoogle == null) {
-					if(groups.length > 0) {
-						self.props.login();
-					} else {
-						self.setState({
-							redirect : true
-						});
-					}
-				} else {
-					this.props.responseGoogle();
-				}
-			}).catch((error) => {
-				self.setState({
-					redirect : true
-				})
-			});
+		AuthenticationAPI.authenticate(response.getAuthResponse()['id_token']).then((credentials) => {
+			self.setState({
+				redirect : true
+			})
 		});
 	}
 
 	renderRedirect() {
 		if(this.state.redirect) {
-			return(<Redirect to="/groups" />);
+			return(<Redirect to="/" />);
 		}
 	}
 
@@ -62,3 +48,11 @@ export default class LoginPage extends Component {
 		)
 	}
 }
+
+// export the connected class
+function mapStateToProps(state) {
+  return {
+    authenticated: state.authenticated || {},
+  };
+}
+export default connect(mapStateToProps)(LoginPage);

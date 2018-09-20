@@ -146,7 +146,6 @@ const actions = {
 		const self = this;
 
 		fs.readFile('./src/data/initial-selections.json', 'utf8', (err, data) => {
-			console.log(data);
 
 			const results = JSON.parse(data);
 

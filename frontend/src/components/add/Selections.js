@@ -159,14 +159,8 @@ export class PlaceSelection extends Component {
             {items}
           </div>
         </div>
-        <span>Latitude: {this.state.latitude}</span>
-        <span>Longitude: {this.state.longitude}</span>
+
         {map}
-        <div className="row">
-          <div className="col-xs-12">
-            <button className="btn btn-primary" onClick={() => this.findMe()}>Find me!</button>
-          </div>
-        </div>
       </div>
     );
   }

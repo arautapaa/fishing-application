@@ -13,7 +13,8 @@ export default class UserGroupPlacePageProvider extends Component {
 			latitude : 62.095732,
 			longitude : 28.318493,
 			places : [],
-			redirect : false
+			redirect : false,
+			initial : true
 		}
 
 		this.addNewPlace = this.addNewPlace.bind(this);
@@ -35,6 +36,12 @@ export default class UserGroupPlacePageProvider extends Component {
 			this.setState({
 				places : places
 			});
+
+			if(places.length > 0) {
+				this.setState({
+					initial : false
+				})
+			}
 		});
 	}
 
@@ -132,9 +139,20 @@ export default class UserGroupPlacePageProvider extends Component {
 
 	printRedirect() {
 		if(this.state.redirect) {
-			return(
-				<Redirect to="/groups/invite" />
-			)
+			if(this.state.initial) {
+				return(
+					<Redirect to="/groups/invite" />
+				)
+			} else {
+				window.scrollTo({
+					top : 0,
+					behaviour : 'smooth'
+				});
+
+				return(
+					<h3>Saved successfully</h3>
+				)
+			}
 		}
 	}
 

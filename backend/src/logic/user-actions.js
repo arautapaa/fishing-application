@@ -118,13 +118,11 @@ const actions = {
 
 		return new Promise((resolve, reject) => {
 			self.getUser(userId).then((user) => {
-				console.log(JSON.stringify(user));
 
-				console.log("Checking groups for " + groupId);
 				let hasAccess = false;
 
 				async.each(user.Groups, (group, callback) => {
-					console.log(group + ", checking if its correct");
+
 					if(group.groupId.trim() === groupId.trim()) {
 						hasAccess = true;
 						callback();

@@ -108,8 +108,6 @@ const actions = {
 	 */
 	addNewPlace : function(userId, place) {
 		return new Promise((resolve, reject) => {
-			console.log("Trying to add a new entry: " + JSON.stringify(place));
-
 			request.get({
 				url : process.env.MAPQUEST_API_URL,
 				qs : {
@@ -118,14 +116,11 @@ const actions = {
 				},
 				json : true
 			}, function(error, response, body) {
-				console.log("Found response: " + JSON.stringify(body));
 
 				place.location = body.results[0].locations[0].adminArea5;
 				place.country = body.results[0].locations[0].adminArea1;
 
 				const uuid = uuidv4();
-
-				console.log("Creating id " + uuid);
 
 				const tableRequest = {
 					TableName : process.env.TABLE_NAME_PLACES,
@@ -161,9 +156,7 @@ const actions = {
 		return new Promise((resolve, reject) => {
 			const starttime = new Date(time.getTime() - 1000 * 60 * 60 * 2);
 			const fmiApiUrl = process.env.FMI_API_URL.replace('{apikey}', process.env.FMI_API_KEY);
-			
-			console.log('Trying to fetch from ' + fmiApiUrl);
-		
+					
 			request({
 				url : fmiApiUrl,
 				qs : {
@@ -177,7 +170,6 @@ const actions = {
 					'ContentType' : 'application/xml'
 				}
 			}, ( err, response, body) => {
-				console.log("Got response, body: " + body);
 
 				parseString(body, (err, result) => {
 					if(err) {

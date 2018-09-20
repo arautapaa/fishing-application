@@ -18,29 +18,26 @@ router.post('/', function(req, res) {
 	const userId = req.selectedUserGroup;
 
 	if(Array.isArray(req.body)) {
-		async.each(req.body, (item, callback) => {
-			if(item.id == null) {
-				actions.addNewPlace(userId, item).then(response => {
-					callback();
+		const promises = [];
+
+		req.body.forEach((item) => {
+			promises.push(
+				actions.addNewPlace(userId, item).then((response) => {
+
 				}).catch((error) => {
-					callback(error);
-				});
-			} else {
-				actions.updatePlace(userId, item).then(response => {
-					callback();
-				}).catch((error) => {
-					callback(error);
-				});
-			}
-		}, (err) => {
-			if(error) {
-				res.status(400).send(error);
-			} else {
-				res.status(201).send({success : true});
-			}	
+
+				})
+			);
 		});
+
+		Promise.all(promises).then((response) => {
+			res.status(201).send({ success : true })
+		}).catch((error) => {
+			res.status(400).send({ success : false })
+		});
+
 	} else {
-		actions.addNewPlace(userId, req.body).then(response => {
+		actions.addNewPlace(userId, req.body).then((response) => {
 			res.status(201).send(response);
 		}).catch(error => {
 			res.status(400).send(error);

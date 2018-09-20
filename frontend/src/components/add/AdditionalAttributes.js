@@ -8,13 +8,11 @@ export class AdditionalAttributes extends Component {
 			attributes : []
 		}
 
-		console.log(props);
-
 		this.onClick = this.onClick.bind(this);
 		this.handleInputChange = this.handleInputChange.bind(this);
 	}
 	handleInputChange(index, name, value) {
-		console.log(index + ", " + name + ", " + value)
+
 		const attributes = this.state.attributes.slice();
 		attributes[index][name] = value;
 		this.setState({
@@ -46,7 +44,7 @@ export class AdditionalAttributes extends Component {
 			<div className="row">
 				{elements}
 				<button className="btn btn-primary" onClick={this.onClick}>
-					Add new
+					Add new additional attribute
 				</button>
 			</div>
 		)
@@ -63,8 +61,6 @@ class AdditionalAttribute extends Component {
 		}
 
 		this.handleChange = this.handleChange.bind(this);
-
-		console.log(props);
 	}
 
 	handleChange(event) {
@@ -76,17 +72,20 @@ class AdditionalAttribute extends Component {
 	}
 
 	render() {
-		return(
+		return[
+			<h3>Additional attribute: {this.state.name}</h3>,
 			<div className="input-group">
 				<label>
-					Name
+					Name for additional attribute
 				</label>
-				<input type="text" name="name" value={this.state.name} onChange={this.handleChange} />
+				<input className="form-control" type="text" name="name" value={this.state.name} placeholder="Additional attribute name" onChange={this.handleChange} />
+			</div>,
+			<div className="input-group">
 				<label>
-					Value
+					Value for additional attribute
 				</label>
-				<input type="text" name="value" value={this.state.value} onChange={this.handleChange} />
+				<input className="form-control" type="text" name="value" value={this.state.value} placeholder="Additional attribute value" onChange={this.handleChange} />
 			</div>
-		)
+		]
 	}
 }

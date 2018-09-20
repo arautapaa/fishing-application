@@ -15,17 +15,26 @@ export default class UserInvitationAcceptProvider extends Component {
 		}
 
 		this.login = this.login.bind(this);
+		this.sendInvitationRequest = this.sendInvitationRequest.bind(this);
 	}
 
 	login() {
+		const self = this;
+
+		this.setState({
+			logged : true
+		});
+
 		setTimeout(function() {
-			this.sendInvitationRequest();
+			self.sendInvitationRequest();
 		}, 1000);
 	}
 
 	sendInvitationRequest() {
 		const id = this.props.match.params.id;
 		const self = this;
+
+		console.log(id);
 
 		if(this.state.logged) {
 			sendRequest('/user/groups/invitation/' + id, 'PUT', {}).then((response) => {

@@ -42,8 +42,6 @@ const actions = {
 							additionalAttributes : item.AdditionalAttributes
 						}
 
-						console.log(JSON.stringify(draught));
-
 						draughts.push(draught);
 
 						callback(null);
@@ -51,7 +49,6 @@ const actions = {
 						if(err) {
 							reject(err);
 						} else {
-							console.log(JSON.stringify(draughts));
 							resolve(draughts);
 						}
 					});
@@ -98,6 +95,57 @@ const actions = {
 		});
 	},
 
+	updateDraught : function(userId, draughtId, draught) {
+
+		return new Promise((resolve, reject) => {				
+			placeActions.getWeather(userId, draught.placeId, new Date(draught.catchTime)).then((place) => {
+				
+				draught.weather = place.weather;
+				const params = {
+				  TableName: process.env.TABLE_NAME_DRAUGHTS,
+				  Key: { 
+				  	UserId : userId,
+				  	DraughtId : draughtId 
+				  },
+				  UpdateExpression: 'set #fish = :fish, #gear = :gear, #place = :place, #fisher = :fisher, #time = :time, #weight = :weight, #weather = :weather, #additionalAttributes = :additionalAttributes',
+				  ExpressionAttributeNames: {'#fish' : 'Fish',
+				  		"#gear" : 'Gear',
+				  		'#place' : 'PlaceId',
+				  		'#fisher' : 'Fisher',
+				  		'#time' : 'CatchTime',
+				  		'#weight' : 'Weight',
+				  		'#weather' : 'Weather', 
+				  		'#additionalAttributes' : "AdditionalAttributes"
+					},
+				  ExpressionAttributeValues: {
+				    ':fish' : draught.fish,
+				    ':gear' : draught.gear,
+				    ':fisher' : draught.fisher,
+				    ':place' : draught.placeId,
+				    ':time' : draught.catchTime,
+				    ':weather' : draught.weather,
+				    ':weight' : draught.weight,
+				    ':additionalAttributes' : draught.additionalAttributes
+				  }
+				};
+
+				dynamoDb.update(params, (err, item) => {
+					if(err) {
+						console.log(err);
+
+
+						reject(err);
+					} else {
+						resolve(draught);
+					}
+				});
+			}).catch((error) => {
+				reject(error);
+			});
+		})
+
+	},
+
 	saveDraught : function(userId, draught) {
 		return new Promise((resolve, reject) => {
 			if(draught.placeId) {
@@ -105,8 +153,7 @@ const actions = {
 					draught.weather = place.weather;
 				
 					const uuid = uuidv4();
-
-					console.log("Creating id " + uuid);
+					draught.id = uuid;
 
 					const tableRequest = {
 						TableName : process.env.TABLE_NAME_DRAUGHTS,
@@ -128,7 +175,7 @@ const actions = {
 						if(err) {
 							reject(err);
 						} else {
-							resolve(result);
+							resolve(draught);
 						}
 					});
 				}).catch((error) => {
